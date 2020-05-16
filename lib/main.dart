@@ -82,7 +82,7 @@ class _HomePageState extends State<HomePage> {
         (MediaQuery.of(context).size.height - 56).toString() + 'px';
 
     return Scaffold(
-        appBar: AppBar(title: Text('Circly')),
+        appBar: AppBar(title: SizedBox(width: 50, child: Text('Circly'))),
         body: Row(children: <Widget>[
           SizedBox(
               width: MediaQuery.of(context).size.width * 0.2,
