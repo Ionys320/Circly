@@ -147,8 +147,9 @@ class _HomePageState extends State<HomePage> {
       placesSearch
           .getPlaces(inputSearch)
           .then((List<mapboxsearch.MapBoxPlace> results) {
-        setState(() => foundedAddressesList = results);
+        foundedAddressesList = results;
       }).catchError((e) {});
+    setState(() {});
   }
 
   void addAddress(int i) {
