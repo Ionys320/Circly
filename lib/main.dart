@@ -143,6 +143,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   void searchAddress() {
+    foundedAddressesList.clear();
     if (inputSearch != null && inputSearch != '')
       placesSearch
           .getPlaces(inputSearch)
