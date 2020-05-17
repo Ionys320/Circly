@@ -97,13 +97,14 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
         appBar: AppBar(
             title: SizedBox(width: 53, child: Text('Circly')),
-            leading: IconButton(
+            leading:  MediaQuery.of(context).size.width < 900
+            ? IconButton(
               icon: Icon(Icons.menu),
               onPressed: () {
                 document.getElementById('map').style.zIndex = '0';
                 Scaffold.of(scaffoldContext).openDrawer();
               },
-            )),
+            ) : null),
         drawer: MediaQuery.of(context).size.width < 900
             ? Drawer(child: addresses())
             : null,
