@@ -6,7 +6,6 @@ import 'package:just_debounce_it/just_debounce_it.dart';
 import 'package:mapbox_search/mapbox_search.dart' as mapboxsearch;
 
 void main() {
-  //Map variables
   runApp(Circly());
 }
 
@@ -18,6 +17,7 @@ class Circly extends StatelessWidget {
         theme: ThemeData(
           primaryColor: Colors.blue,
           visualDensity: VisualDensity.adaptivePlatformDensity,
+          cursorColor: Colors.white,
           inputDecorationTheme: InputDecorationTheme(
               labelStyle: TextStyle(color: Colors.white),
               hoverColor: Colors.white,
@@ -40,6 +40,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  BuildContext scaffoldContext;
+
   //Available colors list
   List<String> colorsList = [
     '#FA00FF',
@@ -76,81 +78,116 @@ class _HomePageState extends State<HomePage> {
   List<map.Circle> circlesList = List<map.Circle>();
 
   @override
-  Widget build(BuildContext context) {
-    //Change the size of the map (56px is the AppBar height)
-    document.getElementById('map').style.height =
-        (MediaQuery.of(context).size.height - 56).toString() + 'px';
+  void initState() {
+    super.initState();
 
-    return Scaffold(
-        appBar: AppBar(title: SizedBox(width: 53, child: Text('Circly'))),
-        body: Row(children: <Widget>[
-          SizedBox(
-              width: MediaQuery.of(context).size.width * 0.2,
-              child: Stack(children: [
-                Align(
-                    alignment: Alignment.topLeft,
-                    child: Container(
-                        color: Theme.of(context).primaryColor,
-                        height: 100,
-                        child: Center(
-                            child: Padding(
-                                padding: EdgeInsets.all(16),
-                                child: TextField(
-                                    enabled: addressesList.length < 6,
-                                    controller: searchFieldController,
-                                    style: TextStyle(color: Colors.white),
-                                    onChanged: ((input) {
-                                      inputSearch = input;
-                                      Debounce.clear(searchAddress);
-                                      Debounce.milliseconds(200, searchAddress);
-                                    }),
-                                    decoration: InputDecoration(
-                                        labelText: 'Nouvelle adresse')))))),
-                Positioned.fill(
-                    top: 100,
-                    child: SizedBox(
-                        height: MediaQuery.of(context).size.height - 156,
-                        child: ListView.separated(
-                            separatorBuilder: (BuildContext context, int i) =>
-                                Divider(),
-                            itemCount: addressesList.length,
-                            itemBuilder: (BuildContext context, int i) =>
-                                ListTile(
-                                  title: Text(addressesList[i].address),
-                                  leading: IconButton(
-                                      icon: Icon(Icons.remove_circle_outline),
-                                      onPressed: () => removeAddress(i)),
-                                  onTap: () => focusPin(i),
-                                )))),
-                if (foundedAddressesList != null &&
-                    foundedAddressesList.length > 0)
-                  Positioned.fill(
-                      top: 78,
-                      child: Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Container(
-                              height: 125,
-                              color: Colors.white,
-                              child: ListView.builder(
-                                  itemCount: foundedAddressesList.length,
-                                  itemBuilder: (BuildContext context, int i) =>
-                                      ListTile(
-                                          title: Text(foundedAddressesList[i]
-                                              .placeName),
-                                          onTap: () => addAddress(i))))))
-              ])),
-        ]));
+    WidgetsBinding.instance.addPostFrameCallback(drawerOpen);
   }
 
+  @override
+  Widget build(BuildContext context) {
+    //Change automaticaly the size of the map (56px is the AppBar height)
+    document.getElementById('map').style.height =
+        (MediaQuery.of(context).size.height - 56).toString() + 'px';
+    document.getElementById('map').style.width =
+        MediaQuery.of(context).size.width < 900 ? '100%' : '80%';
+    document.getElementById('map').style.left =
+        MediaQuery.of(context).size.width < 900 ? '0%' : '20%';
+
+    return Scaffold(
+        appBar: AppBar(
+            title: SizedBox(width: 53, child: Text('Circly')),
+            leading: IconButton(
+              icon: Icon(Icons.menu),
+              onPressed: () {
+                document.getElementById('map').style.zIndex = '0';
+                Scaffold.of(scaffoldContext).openDrawer();
+              },
+            )),
+        drawer: MediaQuery.of(context).size.width < 900
+            ? Drawer(child: addresses())
+            : null,
+        body: Builder(builder: (BuildContext context) {
+          scaffoldContext = context;
+          return MediaQuery.of(context).size.width < 900
+              ? SizedBox.shrink()
+              : addresses();
+        }));
+  }
+
+  void drawerOpen(_) async {
+    while (1 != 0) {
+      document.getElementById('map').style.zIndex =
+          Scaffold.of(scaffoldContext).isDrawerOpen ? '0' : '1';
+      await Future.delayed(Duration(milliseconds: 100));
+    }
+  }
+
+  Widget addresses() => SizedBox(
+      width: MediaQuery.of(context).size.width < 900
+          ? null
+          : MediaQuery.of(context).size.width * 0.2,
+      child: Stack(children: [
+        Align(
+            alignment: Alignment.topLeft,
+            child: Container(
+                color: Theme.of(context).primaryColor,
+                height: 100,
+                child: Center(
+                    child: Padding(
+                        padding: EdgeInsets.all(16),
+                        child: TextField(
+                            enabled: addressesList.length < 6,
+                            controller: searchFieldController,
+                            onChanged: ((input) {
+                              inputSearch = input;
+                              Debounce.clear(searchAddress);
+                              Debounce.milliseconds(200, searchAddress);
+                            }),
+                            style: TextStyle(color: Colors.white),
+                            decoration: InputDecoration(
+                                labelText: 'Adresse à ajouter')))))),
+        Positioned.fill(
+            top: 100,
+            child: SizedBox(
+                height: MediaQuery.of(context).size.height - 156,
+                child: ListView.separated(
+                    separatorBuilder: (BuildContext context, int i) =>
+                        Divider(),
+                    itemCount: addressesList.length,
+                    itemBuilder: (BuildContext context, int i) => ListTile(
+                          title: Text(addressesList[i].address),
+                          leading: IconButton(
+                              icon: Icon(Icons.remove_circle_outline),
+                              onPressed: () => removeAddress(i)),
+                          onTap: () => focusPin(i),
+                        )))),
+        if (foundedAddressesList != null && foundedAddressesList.length > 0)
+          Positioned.fill(
+              top: 78,
+              child: Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16),
+                  child: Container(
+                      height: 125,
+                      color: Colors.white,
+                      child: ListView.builder(
+                          itemCount: foundedAddressesList.length,
+                          itemBuilder: (BuildContext context, int i) =>
+                              ListTile(
+                                  title:
+                                      Text(foundedAddressesList[i].placeName),
+                                  onTap: () => addAddress(i))))))
+      ]));
+
   void searchAddress() {
-    foundedAddressesList.clear();
+    setState(() => foundedAddressesList.clear());
+
     if (inputSearch != null && inputSearch != '')
       placesSearch
           .getPlaces(inputSearch)
           .then((List<mapboxsearch.MapBoxPlace> results) {
-        foundedAddressesList = results;
+        setState(() => foundedAddressesList = results);
       }).catchError((e) {});
-    setState(() {});
   }
 
   void addAddress(int i) {
