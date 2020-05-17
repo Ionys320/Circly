@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> {
       limit: 5,
       country: 'fr',
       language: 'fr');
-  List<mapboxsearch.MapBoxPlace> foundedAddressesList =
+  List<mapboxsearch.MapBoxPlace> foundAddressesList =
       List<mapboxsearch.MapBoxPlace>();
 
   //Map
@@ -162,7 +162,7 @@ class _HomePageState extends State<HomePage> {
                               onPressed: () => removeAddress(i)),
                           onTap: () => focusPin(i),
                         )))),
-        if (foundedAddressesList != null && foundedAddressesList.length > 0)
+        if (foundAddressesList != null && foundAddressesList.length > 0)
           Positioned.fill(
               top: 78,
               child: Padding(
@@ -171,27 +171,26 @@ class _HomePageState extends State<HomePage> {
                       height: 125,
                       color: Colors.white,
                       child: ListView.builder(
-                          itemCount: foundedAddressesList.length,
+                          itemCount: foundAddressesList.length,
                           itemBuilder: (BuildContext context, int i) =>
                               ListTile(
-                                  title:
-                                      Text(foundedAddressesList[i].placeName),
+                                  title: Text(foundAddressesList[i].placeName),
                                   onTap: () => addAddress(i))))))
       ]));
 
   void searchAddress() {
-    setState(() => foundedAddressesList.clear());
+    setState(() => foundAddressesList.clear());
 
     if (inputSearch != null && inputSearch != '')
       placesSearch
           .getPlaces(inputSearch)
           .then((List<mapboxsearch.MapBoxPlace> results) {
-        setState(() => foundedAddressesList = results);
+        setState(() => foundAddressesList = results);
       }).catchError((e) {});
   }
 
   void addAddress(int i) {
-    mapboxsearch.MapBoxPlace mapBoxPlace = foundedAddressesList[i];
+    mapboxsearch.MapBoxPlace mapBoxPlace = foundAddressesList[i];
 
     Address address = Address(
         mapBoxPlace.placeName,
@@ -214,7 +213,7 @@ class _HomePageState extends State<HomePage> {
     colorsList.removeAt(0);
 
     //Reset the search variables
-    foundedAddressesList.clear();
+    foundAddressesList.clear();
     searchFieldController.clear();
 
     focusPin(addressesList.length - 1);
